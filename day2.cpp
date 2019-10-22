@@ -12,15 +12,18 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <chrono>
 
 //using namespace std;
-
+#define FILE_LOCATION "C:\\Users\\ekdbmrx\\Desktop\\day2.txt"
 
 bool prepare(std::vector<std::string>& ids);
 void checksum_ids(std::vector<std::string>& ids);
+void find_correct_box_ids(std::vector<std::string>& ids);
 
 
 int main(void){
+	auto start = std::chrono::high_resolution_clock::now();
 
 	std::vector<std::string> ids;
 
@@ -29,6 +32,11 @@ int main(void){
 	}
 
 	checksum_ids(ids);
+	find_correct_box_ids(ids);
+
+	auto end = std::chrono::high_resolution_clock::now();
+	auto time = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
+	std::cout<<"Program execution time: "<<time.count()<<" ms"<<std::endl;
 
 	return 0;
 }
@@ -38,7 +46,7 @@ bool prepare(std::vector<std::string>& ids){
 	std::ifstream inFile;
 	std::string id;
 
-	inFile.open("C:\\Users\\Mario\\Desktop\\aoc2018\\day2.txt");
+	inFile.open(FILE_LOCATION);
 	if(inFile.is_open()){
 		while(inFile>>id){
 			ids.push_back(id);
@@ -82,15 +90,23 @@ void checksum_ids(std::vector<std::string>& ids){
 }
 
 void find_correct_box_ids(std::vector<std::string>& ids){
-	std::map<char, int> m;
-	std::vector<std::map<char, int>> letters;
-
-	for(auto const& box_id : ids){
-		for(auto const& c : box_id){
-			auto i = &c - &box_id[0]; 	//current index
-			m[c] = i;
-			letters.push_back(m);				// do {char, index} map for each box_id
+	for(auto const& i: ids){
+		for(auto const& j: ids){
+			auto it1 = begin(i);
+			auto it2 = begin(j);
+			int num = 0;
+			for(;it1 != end(i); it1++, it2++){
+				if(*it1 != *it2){
+					num++;
+				}
+			}
+			if(num == 1){
+				std::cout<<"Boxes: "<<i<<" and "<<j<<" are almost the same!"<<std::endl;
+				return;
+			}
 		}
 	}
+
+
 }
 
