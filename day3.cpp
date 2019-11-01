@@ -8,47 +8,79 @@
 
 #include <string>
 #include <fstream>
+#include <sstream>
 #include <iostream>
 #include <vector>
 #include <map>
-#include <chrono>
+#include <boost/algorithm/string.hpp>
 
 //using namespace std;
-#define FILE_LOCATION "C:\\Users\\ekdbmrx\\Desktop\\aoc2018\\day3.txt"
+#define FILE_LOCATION "C:\\Users\\Mario\\Desktop\\aoc2018\\day3.txt"
 
 bool prepare(std::vector<std::string>& claims);
-void overlapping_fabric_inches(std::vector<std::string>& claims);
-void get_starting_coords(std::string& claim, int& x, int& y);
-void get_width_height(std::string& claim, int& w, int& h);
-
 
 int main(void){
-	auto start = std::chrono::high_resolution_clock::now();
 
-	std::vector<std::string> claims;
+	int area_claimed = 0;
 
-	if(!prepare(claims)){
+	std::vector<std::string> input;
+	std::cout<<"starting program..."<<std::endl;
+	if(!prepare(input)){
 		return EXIT_FAILURE;
 	}
 
-	overlapping_fabric_inches(claims);
+    std::map<std::pair<int,int>,int> dots;
 
-
-	auto end = std::chrono::high_resolution_clock::now();
-	auto time = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
-	std::cout<<"Program execution time: "<<time.count()<<" ms"<<std::endl;
-
+    for (auto line : input) {
+    	std::vector<std::string> tokens;
+    	boost::algorithm::split(tokens, line, boost::algorithm::is_any_of("# @,:x"));
+    	int start_x = std::stoi(tokens[4]);
+    	int start_y = std::stoi(tokens[5]);
+    	int width = std::stoi(tokens[7]);
+    	int height = std::stoi(tokens[8]);
+        for (int x = start_x; x < start_x+width; x++) {
+            for (int y = start_y; y < start_y+height; y++) {
+            	++dots[std::make_pair(x,y)];
+            	if(dots[{x,y}] == 2){
+            		area_claimed++;
+            	}
+            }
+        }
+    }
+    int unique = 0;
+    for (auto line : input) {
+    	bool overlap = false;
+    	std::vector<std::string> tokens;
+    	boost::algorithm::split(tokens, line, boost::algorithm::is_any_of("# @,:x"));
+    	int claim_no = std::stoi(tokens[1]);
+    	int start_x = std::stoi(tokens[4]);
+    	int start_y = std::stoi(tokens[5]);
+    	int width = std::stoi(tokens[7]);
+    	int height = std::stoi(tokens[8]);
+        for (int x = start_x; x < start_x+width; x++) {
+            for (int y = start_y; y < start_y+height; y++) {
+            	if(dots[{x,y}] > 1){
+            		overlap = true;
+            	}
+            }
+        }
+        if(!overlap){
+        	unique = claim_no;
+        }
+    }
+    std::cout<<"Part 1: Overlapping area: "<<area_claimed<<std::endl;
+    std::cout<<"Part 2: Unique claim ID: "<<unique<<std::endl;
 	return 0;
 }
 
-
+//split by new line, put each line in vector
 bool prepare(std::vector<std::string>& claims){
 	std::ifstream inFile;
 	std::string claim;
 
 	inFile.open(FILE_LOCATION);
 	if(inFile.is_open()){
-		while(inFile>>claim){
+		while(std::getline(inFile,claim)){
 			claims.push_back(claim);
 		}
 	}
@@ -57,45 +89,4 @@ bool prepare(std::vector<std::string>& claims){
 		return false;
 	}
 	return true;
-}
-
-void overlapping_fabric_inches(std::vector<std::string>& claims){
-	std::map<int, int> pairs;
-	unsigned overlaps = 0;
-
-	// make a map with {x,y} pairs that behave like coordinates made in claim
-	for(std::string& claim: claims){
-		int start_x,start_y,w,h = 0;
-		get_starting_coords(claim,start_x,start_y);
-		get_width_height(claim,w,h);
-		for(auto y = start_y; y != start_y+h-1; y++){
-			for(auto x = start_x; x != start_x+w-1; x++){
-				auto ret = pairs.insert(std::pair<int, int>(x,y));
-				if(ret.second == false){
-					overlaps++;
-				}
-			}
-		}
-	}
-	std::cout<<"Number of overlaps: "<<overlaps<<std::endl;
-}
-
-void get_starting_coords(std::string& claim, int& x, int& y){
-	int first = claim.find("@ ");
-	int second = claim.find(",");
-	x = std::atoi(claim.substr(first+2, second-first-2).c_str());
-
-	first = claim.find(",");
-	second = claim.find(":");
-	y = std::atoi(claim.substr(first+1, second-first-1).c_str());
-}
-
-void get_width_height(std::string& claim, int& w, int& h){
-	int first = claim.find(": ");
-	int second = claim.find("x");
-	w = std::atoi(claim.substr(first+2, second-first-2).c_str());
-
-	first = claim.find("x");
-	second = claim.find("\n");
-	h = std::atoi(claim.substr(first+1, second-first-1).c_str());
 }

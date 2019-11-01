@@ -12,7 +12,6 @@
 #include <iostream>
 #include <vector>
 #include <map>
-#include <chrono>
 
 //using namespace std;
 #define FILE_LOCATION "C:\\Users\\ekdbmrx\\Desktop\\day2.txt"
@@ -23,7 +22,6 @@ void find_correct_box_ids(std::vector<std::string>& ids);
 
 
 int main(void){
-	auto start = std::chrono::high_resolution_clock::now();
 
 	std::vector<std::string> ids;
 
@@ -33,10 +31,6 @@ int main(void){
 
 	checksum_ids(ids);
 	find_correct_box_ids(ids);
-
-	auto end = std::chrono::high_resolution_clock::now();
-	auto time = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
-	std::cout<<"Program execution time: "<<time.count()<<" ms"<<std::endl;
 
 	return 0;
 }
@@ -92,10 +86,9 @@ void checksum_ids(std::vector<std::string>& ids){
 void find_correct_box_ids(std::vector<std::string>& ids){
 	for(auto const& i: ids){
 		for(auto const& j: ids){
-			auto it1 = begin(i);
 			auto it2 = begin(j);
 			int num = 0;
-			for(;it1 != end(i); it1++, it2++){
+			for(auto it1 = begin(i);it1 != end(i); it1++, it2++){
 				if(*it1 != *it2){
 					num++;
 				}
