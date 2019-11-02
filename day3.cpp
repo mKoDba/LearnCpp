@@ -8,7 +8,6 @@
 
 #include <string>
 #include <fstream>
-#include <sstream>
 #include <iostream>
 #include <vector>
 #include <map>
@@ -20,11 +19,10 @@
 bool prepare(std::vector<std::string>& claims);
 
 int main(void){
-
+    clock_t start = clock();
 	int area_claimed = 0;
 
 	std::vector<std::string> input;
-	std::cout<<"starting program..."<<std::endl;
 	if(!prepare(input)){
 		return EXIT_FAILURE;
 	}
@@ -68,6 +66,7 @@ int main(void){
         	unique = claim_no;
         }
     }
+    std::cout << "duration: " << float( clock () - start ) * 1000.0 /  CLOCKS_PER_SEC <<" ms"<<std::endl;
     std::cout<<"Part 1: Overlapping area: "<<area_claimed<<std::endl;
     std::cout<<"Part 2: Unique claim ID: "<<unique<<std::endl;
 	return 0;
